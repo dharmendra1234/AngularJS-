@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<script
+	src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<body>
+	<div ng-app="app">
+		<div ng-controller="ContactController">
+			<form>
+				<label>Name</label> <input type="text" name="name" 	ng-model="newcontact.name" /> 
+				<label>Email</label> <input type="text" name="email" ng-model="newcontact.email" /> 
+				<label>Phone</label> <input type="text" name="phone" ng-model="newcontact.phone" /> <br />
+				<input type="hidden" ng-model="newcontact.id" /> <input type="button" value="Save" ng-click="saveContact()" />
+			</form>
+			<table>
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Email</th>
+						<th>Phone</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="contact in contacts">
+						<td>{{ contact.name }}</td>
+						<td>{{ contact.email }}</td>
+						<td>{{ contact.phone }}</td>
+						<td><a href="#" ng-click="edit(contact.id)">edit</a> | <a
+							href="#" ng-click="delete(contact.id)">delete</a></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<script>
+var module = angular.module('app', []);
+
+ module.factory('ContactListFactory', function(ContactService){
+     return {
+            list: function(){
+        	 return ContactService.list();
+        }  
+     
+         
+     }               
+ });
+
+module.service('ContactEditService', function(ContactService) {
+	this.editContact =function (id) {
+		return angular.copy(ContactService.get(id)); 
+	 }
+	    
+});
+
+
+module.service('ContactService', function () {
+	var contacts = [{ id: 0,  'name': 'Dharmendra',   'email': 'dharmendra.pawar@gmail.com',   'phone': '470-809-3327' }], uid = 1;
+    this.save = function (contact) {
+    	 if (contact.id == null) {
+            contact.id = uid++;
+            contacts.push(contact);
+        } else {
+            for (i in contacts) {
+                if (contacts[i].id == contact.id) {
+                    contacts[i] = contact;
+                }
+            }
+        }
+     }
+            
+    this.get = function (id) {
+    	alert('test' )
+    	alert('id')
+        for (i in contacts) {
+            if (contacts[i].id == id) {
+                return contacts[i];
+            }
+        }
+     }
+     
+    this.delete = function (id) {
+        for (i in contacts) {
+            if (contacts[i].id == id) {
+                contacts.splice(i, 1);
+            }
+        }
+    }
+     
+    this.list = function () {
+        return contacts;
+    }
+});
+ 
+ 
+ 
+module.controller('ContactController', function ($scope, ContactListFactory,ContactService,ContactEditService) {
+	
+	 
+	 $scope.saveContact = function () { //ContactService
+     ContactService.save($scope.newcontact);
+     $scope.newcontact = {};
+    }
+  
+    $scope.delete = function (id) {  //ContactService
+        ContactService.delete(id);
+     if ($scope.newcontact.id == id)
+    	 $scope.newcontact = {};
+    
+    }
+  
+   
+  $scope.edit= function(id){                   //ContactEditService
+	  $scope.newcontact = ContactEditService.editContact(id);
+  }
+  
+  $scope.contacts = ContactListFactory.list(); //ContactListFactory
+
+})
+</script>
+
+</body>
+</html>
